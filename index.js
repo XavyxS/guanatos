@@ -25,7 +25,7 @@ app.use((req, res, next) => {
 });
 
 async function devProfileid() {
-    const profileid = req.profileid;
+    const profileid = req.session.profileid;
     return profileid;
 };
 

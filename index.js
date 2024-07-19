@@ -48,9 +48,10 @@ app.post('/callback', async (req, res) => {
     console.log('Recibiendo notificación en /callback');
     console.log('Estado de la sesión en /callback:', req.session);
 
-    const tokenid = await autenticar(req, res, './');
+    // Verificar si hay una redirección antes de continuar
+    const tokenid = await autenticar(req, res, '/callback');
     if (!tokenid) {
-        return res.status(401).send('No se pudo autenticar');
+        return; // Si ya se envió una respuesta (redirección), no continuar
     }
 
     const notification = req.body;

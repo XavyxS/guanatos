@@ -1,9 +1,7 @@
 const axios = require('axios');
-const { createDatabaseAndTable } = require('./db');
 
 async function autenticar(req, res, nextUrl) {
     if (req.session.profileid) {
-        await createDatabaseAndTable(req.session.profileid);
         
         const created_at = new Date(req.session.tokenid.created_at);
         const current_date = new Date();
@@ -81,39 +79,7 @@ async function handleAuthCallback(req, res) {
         };
         req.session.profileid = profileid;
 
-        await createDatabaseAndTable(profileid);
-
-        // Ejemplo de cómo almacenar datos en la base de datos
-        const dbName = `${sanitizeDatabaseName(profileid.nickname)}${profileid.id}`;
-        const dbConnection = await pool.promise().createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: dbName
-        });
-
-        const exampleData = {
-            _id: 'example_id',
-            resource: 'example_resource',
-            topic: 'example_topic',
-            application_id: 'example_app_id',
-            attempts: 1,
-            sent: new Date(),
-            received: new Date(),
-            user_id: profileid.id
-        };
-
-        const insertQuery = `INSERT INTO questions SET ?`;
-
-        dbConnection.query(insertQuery, exampleData, (err, results) => {
-            if (err) {
-                console.error('Error al insertar datos en la tabla "questions":', err.stack);
-            } else {
-                console.log('Datos insertados en la tabla "questions":', results);
-            }
-            dbConnection.end();
-        });
-
+        
         const nextUrl = req.session.nextUrl || '/dashboard';
         res.redirect(nextUrl);
     } catch (error) {

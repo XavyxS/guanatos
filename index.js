@@ -52,6 +52,7 @@ app.get('/questions', async (req, res) => {
 // Nueva ruta para recibir notificaciones
 app.post('/callback', async (req, res) => {
     const notification = req.body;
+    console.log("Notificación recibida", notification);
 
     try {
         // Convertir las fechas a un formato aceptable para MySQL
@@ -63,7 +64,6 @@ app.post('/callback', async (req, res) => {
         try {
             // Obtener el nombre de la base de datos que termina con el user_id
             const [databases] = await connection.query('SHOW DATABASES');
-            console.log(`Las bases de datos son: ${databases} y el user_id es: ${notification.user_id}`);
             const dbName = databases
                 .map(db => db.Database)
                 .find(db => db.endsWith(`_${notification.user_id}`));

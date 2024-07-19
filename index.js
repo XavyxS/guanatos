@@ -24,6 +24,10 @@ app.use((req, res, next) => {
     next();
 });
 
+function sanitizeDatabaseName(name) {
+    return name.replace(/[^a-zA-Z0-9_]/g, ''); // Eliminar todos los caracteres no válidos
+}
+
 
 app.get('/auth', handleAuthCallback);
 

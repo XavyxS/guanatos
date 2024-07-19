@@ -89,6 +89,51 @@ async function autenticar(req, res, nextUrl) {
     }
 }
 
+async function handleAuthCallback(req, res) {
+    const { code } = req.query;
+    if (!code) {
+        return res.status(400).send('Authorization code not provided');
+    }
+
+    try {
+        const response = await axios.post('https://api.mercadolibre.com/oauth/token', null, {
+            params: {
+                grant_type: 'authorization_code',
+                client_id: process.env.CLIENT_ID,
+                client_secret: process.env.CLIENT_SECRET,
+                code: code,
+                redirect_uri: process.env.REDIRECT_URI
+            },
+            headers: {
+                'content-type': 'application/x-www-form-urlencoded'
+            }
+        });
+
+        const tokenid = response.data;
+        const access_token = tokenid.access_token;
+        const userInfoResponse = await axios.get('https://api.mercadolibre.com/users/me', {
+            headers: {
+                Authorization: `Bearer ${access_token}`
+            }
+        });
+
+        const profileid = userInfoResponse.data;
+        req.session.tokenid = {
+            ...tokenid,
+            created_at: new Date().toISOString()
+        };
+        req.session.profileid = profileid;
+
+        console.log('Profile ID almacenado en handleAuthCallback:', profileid);
+
+        const nextUrl = req.session.nextUrl || '/dashboard';
+        res.redirect(nextUrl);
+    } catch (error) {
+        res.status(500).send(`<h1>Error during authorization</h1><p>${error.response ? error.response.data : error.message}</p>`);
+    }
+}
+
+
 module.exports = {
     autenticar,
     handleAuthCallback

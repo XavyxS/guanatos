@@ -44,9 +44,9 @@ app.get('/questions', async (req, res) => {
 });
 
 // Ruta para manejar las notificaciones de Mercado Libre
-app.post('/callback', async (req, res) => {
+app.post('/callback', async (ret, res) => {
     console.log('Recibiendo notificación en /callback');
-    const notification = req.body;
+    const notification = ret.body;
     console.log("Notificación recibida", notification);
     res.status(200).send('Notification received');
 });

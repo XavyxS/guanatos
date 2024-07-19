@@ -48,7 +48,7 @@ app.post('/callback', async (req, res) => {
     console.log('Recibiendo notificación en /callback');
     console.log('Estado de la sesión en /callback:', req.session);
 
-    const tokenid = await autenticar(req, res, '/callback');
+    const tokenid = await autenticar(req, res, './');
     if (!tokenid) {
         return res.status(401).send('No se pudo autenticar');
     }

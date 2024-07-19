@@ -20,7 +20,7 @@ app.use(session({
 
 // Middleware para imprimir el estado de la sesión
 app.use((req, res, next) => {
-    console.log('Estado de la sesión:', req.session);
+    //console.log('Estado de la sesión:', req.session);
     next();
 });
 

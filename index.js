@@ -46,23 +46,7 @@ app.get('/questions', async (req, res) => {
 // Ruta para manejar las notificaciones de Mercado Libre
 app.post('/callback', async (req, res) => {
     console.log('Recibiendo notificación en /callback');
-    console.log('Estado de la sesión en /callback:', req.session);
-
-    // Verificar si hay una redirección antes de continuar
-    const tokenid = await autenticar(req, res, '/callback');
-    if (!tokenid) {
-        return; // Si ya se envió una respuesta (redirección), no continuar
-    }
-
     const notification = req.body;
-
-    // Verificar si profileid está definido en la sesión
-    if (!req.session.profileid) {
-        console.error('profileid no está definido en la sesión.');
-        return res.status(400).send('profileid no está definido en la sesión.');
-    }
-
-    console.log(`Usuario:\n${req.session.profileid.nickname}`);
     console.log("Notificación recibida", notification);
     res.status(200).send('Notification received');
 });

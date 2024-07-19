@@ -24,6 +24,11 @@ app.use((req, res, next) => {
     next();
 });
 
+async function devProfileid() {
+    const profileid = req.profileid;
+    return profileid;
+};
+
 app.get('/auth', handleAuthCallback);
 
 app.get('/dashboard', async (req, res) => {
@@ -47,8 +52,8 @@ app.get('/questions', async (req, res) => {
 app.post('/callback', async (req, res) => {
     console.log('Recibiendo notificación en /callback');
     const notification = req.body;
-    const nickname = req.session.profileid.nickname;
-    console.log(`Usuario: ${nickname}`);
+    const profileid = devProfileid();
+    console.log(`Usuario: ${profileid.nickname}`);
     console.log("Notificación recibida", notification);
     res.status(200).send('Notification received');
 });

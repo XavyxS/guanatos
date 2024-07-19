@@ -5,7 +5,7 @@ function sanitizeDatabaseName(name) {
     return name.replace(/[^a-zA-Z0-9_]/g, ''); // Eliminar todos los caracteres no válidos
 }
 
-// Función para crear la base de datos y tabla si no existen
+// Función para crear la base de datos y tablas si no existen
 async function verificarOCrearBD(profileid) {
     const dbName = sanitizeDatabaseName(`${profileid.nickname}_${profileid.id}`);
     const connection = await mysql.createConnection({
@@ -20,9 +20,23 @@ async function verificarOCrearBD(profileid) {
     // Conectar a la base de datos específica
     await connection.query(`USE ${dbName}`);
 
-    // Crear la tabla 'questions' si no existe
+    // Crear las tablas si no existen
+    const tables = [
+        'items',
+        'payments',
+        'orders_feedback',
+        'claims',
+        'orders_v2',
+        'items_prices',
+        'shipments',
+        'fbm_stock_operations',
+        'messages',
+        'questions',
+        'stock_locations'
+    ];
+
     const createTableQuery = `
-        CREATE TABLE IF NOT EXISTS questions (
+        CREATE TABLE IF NOT EXISTS ?? (
             id INT AUTO_INCREMENT PRIMARY KEY,
             _id VARCHAR(255),
             resource VARCHAR(255),
@@ -34,7 +48,11 @@ async function verificarOCrearBD(profileid) {
             user_id VARCHAR(45)
         );
     `;
-    await connection.query(createTableQuery);
+
+    for (const table of tables) {
+        await connection.query(createTableQuery, [table]);
+    }
+
     await connection.end();
 }
 
@@ -44,7 +62,7 @@ async function autenticar(req, res, nextUrl) {
         const created_at = new Date(req.session.tokenid.created_at);
         const current_date = new Date();
         const fiveHoursInMillis = 5 * 60 * 60 * 1000;
-        
+
         if (current_date - created_at >= fiveHoursInMillis) { // Vamos a renovar el token
             const refresh_token = req.session.tokenid.refresh_token;
             try {

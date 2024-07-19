@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const { autenticar, handleAuthCallback } = require('./auth'); // Importar las funciones de auth.js
+const { autenticar, handleAuthCallback, pool } = require('./auth'); // Importar el pool
 
 dotenv.config();
 const app = express();

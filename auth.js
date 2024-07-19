@@ -1,5 +1,14 @@
-const axios = require('axios'); // Asegúrate de importar axios
-const mysql = require('mysql2/promise'); // Importa mysql2
+const axios = require('axios');
+const mysql = require('mysql2/promise');
+
+const pool = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    waitForConnections: true,
+    connectionLimit: 10, // Ajusta este valor según tus necesidades
+    queueLimit: 0
+});
 
 function sanitizeDatabaseName(name) {
     return name.replace(/[^a-zA-Z0-9_]/g, ''); // Eliminar todos los caracteres no válidos
@@ -8,52 +17,50 @@ function sanitizeDatabaseName(name) {
 // Función para crear la base de datos y tablas si no existen
 async function verificarOCrearBD(profileid) {
     const dbName = sanitizeDatabaseName(`${profileid.nickname}_${profileid.id}`);
-    const connection = await mysql.createConnection({
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-    });
+    const connection = await pool.getConnection();
 
-    // Crear la base de datos si no existe
-    await connection.query(`CREATE DATABASE IF NOT EXISTS ${dbName}`);
+    try {
+        // Crear la base de datos si no existe
+        await connection.query(`CREATE DATABASE IF NOT EXISTS ${dbName}`);
 
-    // Conectar a la base de datos específica
-    await connection.query(`USE ${dbName}`);
+        // Conectar a la base de datos específica
+        await connection.query(`USE ${dbName}`);
 
-    // Crear las tablas si no existen
-    const tables = [
-        'items',
-        'payments',
-        'orders_feedback',
-        'claims',
-        'orders_v2',
-        'items_prices',
-        'shipments',
-        'fbm_stock_operations',
-        'messages',
-        'questions',
-        'stock_locations'
-    ];
+        // Crear las tablas si no existen
+        const tables = [
+            'items',
+            'payments',
+            'orders_feedback',
+            'claims',
+            'orders_v2',
+            'items_prices',
+            'shipments',
+            'fbm_stock_operations',
+            'messages',
+            'questions',
+            'stock_locations'
+        ];
 
-    const createTableQuery = `
-        CREATE TABLE IF NOT EXISTS ?? (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            _id VARCHAR(255),
-            resource VARCHAR(255),
-            topic VARCHAR(50),
-            application_id VARCHAR(30),
-            attempts INT,
-            sent DATETIME(3),
-            received DATETIME(3),
-            user_id VARCHAR(45)
-        );
-    `;
+        const createTableQuery = `
+            CREATE TABLE IF NOT EXISTS ?? (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                _id VARCHAR(255),
+                resource VARCHAR(255),
+                topic VARCHAR(50),
+                application_id VARCHAR(30),
+                attempts INT,
+                sent DATETIME(3),
+                received DATETIME(3),
+                user_id VARCHAR(45)
+            );
+        `;
 
-    for (const table of tables) {
-        await connection.query(createTableQuery, [table]);
+        for (const table of tables) {
+            await connection.query(createTableQuery, [table]);
+        }
+    } finally {
+        connection.release(); // Liberar la conexión de vuelta al pool
     }
-
-    await connection.end();
 }
 
 // Modificación en la función autenticar

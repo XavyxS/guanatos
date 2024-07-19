@@ -38,7 +38,8 @@ async function verificarOCrearBD(profileid) {
             'fbm_stock_operations',
             'messages',
             'questions',
-            'stock_locations'
+            'stock_locations',
+            'others'
         ];
 
         const createTableQuery = `

@@ -185,15 +185,21 @@ app.get('/api/questions', async (req, res) => {
     }
 });
 
-// Ruta para obtener información del usuario
+
+// Ruta para obtener información del usuario que hizo la pregunta
 app.get('/api/user_info', async (req, res) => {
     const tokenid = await autenticar(req, res, '/user_info');
     if (!tokenid) {
         return res.status(400).send('User ID not found in session');
     }
 
+    const userId = req.query.user_id;
+    if (!userId) {
+        return res.status(400).send('User ID is required');
+    }
+
     try {
-        const userInfoResponse = await axios.get('https://api.mercadolibre.com/users/me', {
+        const userInfoResponse = await axios.get(`https://api.mercadolibre.com/users/${userId}`, {
             headers: {
                 Authorization: `Bearer ${tokenid.access_token}`
             }
@@ -205,6 +211,7 @@ app.get('/api/user_info', async (req, res) => {
         res.status(500).send('Error fetching user info');
     }
 });
+
 
 // Ruta para obtener información del artículo
 app.get('/api/item_info', async (req, res) => {

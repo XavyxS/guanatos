@@ -101,22 +101,8 @@
                 }
             }
 
-            // Cargar la información del vendedor
-            async function loadUserInfo() {
-                try {
-                    const response = await fetch('/api/user_info');
-                    const userInfo = await response.json();
-
-                    const userInfoDiv = document.getElementById('user-info');
-                    userInfoDiv.textContent = `Usuario: ${userInfo.nickname}`;
-                } catch (error) {
-                    console.error('Error loading user info:', error);
-                }
-            }
-
             // Cargar la información del vendedor y las preguntas cuando la página se carga
             window.onload = function() {
-                loadUserInfo();
                 loadQuestions();
             };
         </script>

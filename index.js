@@ -75,9 +75,13 @@ app.post('/callback', async (req, res) => {
             // Usar la base de datos específica
             await connection.query(`USE ${sanitizeDatabaseName(dbName)}`);
 
+            // Verificar si la tabla especificada en el topic existe
+            const [tables] = await connection.query('SHOW TABLES LIKE ?', [notification.topic]);
+            const tableName = tables.length > 0 ? notification.topic : 'others';
+
             // Insertar la notificación en la tabla correspondiente
             const insertQuery = `
-                INSERT INTO ${notification.topic} (_id, resource, topic, application_id, attempts, sent, received, user_id)
+                INSERT INTO ${tableName} (_id, resource, topic, application_id, attempts, sent, received, user_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             `;
             await connection.query(insertQuery, [

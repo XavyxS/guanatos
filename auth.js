@@ -165,5 +165,7 @@ async function handleAuthCallback(req, res) {
 module.exports = {
     autenticar,
     handleAuthCallback,
-    pool 
+    pool,
+    profileid,
+    tokenid
 };

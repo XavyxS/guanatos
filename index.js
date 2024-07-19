@@ -21,7 +21,6 @@ app.use(express.json());
 
 app.get('/auth', handleAuthCallback);
 
-
 app.get('/dashboard', async (req, res) => {
     const tokenid = await autenticar(req, res, '/dashboard');
     if (tokenid) {

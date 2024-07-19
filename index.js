@@ -22,8 +22,8 @@ app.get('/dashboard', async (req, res) => {
     const tokenid = await autenticar(req, res, '/dashboard');
     if (tokenid) {
         const profileid = req.session.profileid;
-        console.log(profileid);
-        console.log(JSON.stringify(tokenid, null, 2));
+        console.log(`Usuario:\n${profileid.nickname}`);
+        console.log(`Token:\n${tokenid}`);
         res.sendFile(__dirname + '/public/dashboard.html');
     }
 });
@@ -38,8 +38,10 @@ app.get('/questions', async (req, res) => {
 // Ruta para manejar las notificaciones de Mercado Libre
 app.post('/callback', (req, res) => {
     const notification = req.body;
+    const profileid = req.session.profileid;
+    console.log(`Usuario:\n${profileid.nickname}`);
     console.log("Notificación recibida", notification);
-    res.status(200).send('Notification received and stored');
+    res.status(200).send('Notification received');
 });
 
 app.get('/', (req, res) => {

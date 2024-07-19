@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const { autenticar, handleAuthCallback, pool } = require('./auth'); // Importar el pool
+const { autenticar, handleAuthCallback, pool } = require('./auth');
 
 dotenv.config();
 const app = express();
@@ -59,6 +59,7 @@ app.post('/callback', async (req, res) => {
         try {
             // Obtener el nombre de la base de datos que termina con el user_id
             const [databases] = await connection.query('SHOW DATABASES');
+            console.log(`Las bases de datos son: ${databases} y el user_id es: ${notification.user_id}`);
             const dbName = databases
                 .map(db => db.Database)
                 .find(db => db.endsWith(`_${notification.user_id}`));

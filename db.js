@@ -38,24 +38,14 @@ function createDatabaseAndTable(profileid) {
                 }
                 console.log(`Base de datos ${dbName} creada o ya existe`);
 
-                // Cerrar la conexión inicial
-                connection.release();
-
-                // Crear una nueva conexión especificando la base de datos
-                const dbConnection = pool.promise().createConnection({
-                    host: process.env.DB_HOST,
-                    user: process.env.DB_USER,
-                    password: process.env.DB_PASSWORD,
-                    database: dbName
-                });
-
-                dbConnection.connect(err => {
+                // Cambiar la base de datos de la conexión actual
+                connection.changeUser({ database: dbName }, (err) => {
                     if (err) {
-                        console.error('Error conectando a la base de datos', err.stack);
-                        dbConnection.end();
+                        console.error('Error al cambiar de base de datos:', err.stack);
+                        connection.release();
                         return reject(err);
                     }
-                    console.log('Conectado a la base de datos.');
+                    console.log(`Conexión cambiada a la base de datos ${dbName}.`);
 
                     // Crear la tabla 'questions' si no existe
                     const createTableQuery = `
@@ -71,14 +61,14 @@ function createDatabaseAndTable(profileid) {
                             user_id VARCHAR(45)
                         )`;
 
-                    dbConnection.query(createTableQuery, (err, results) => {
+                    connection.query(createTableQuery, (err, results) => {
                         if (err) {
                             console.error('Error al crear la tabla "questions":', err.stack);
-                            dbConnection.end();
+                            connection.release();
                             return reject(err);
                         }
                         console.log('Tabla "questions" creada o ya existe.');
-                        dbConnection.end();
+                        connection.release();
                         resolve();
                     });
                 });

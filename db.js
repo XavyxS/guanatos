@@ -19,7 +19,7 @@ function sanitizeDatabaseName(name) {
 function createDatabaseAndTable(profileid) {
     const userid = profileid.id;
     const nickname = sanitizeDatabaseName(profileid.nickname);
-    const dbName = `${nickname}${userid}`;
+    const dbName = `${nickname}_${userid}`;
 
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {

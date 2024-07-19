@@ -24,6 +24,7 @@ app.use((req, res, next) => {
     next();
 });
 
+
 app.get('/auth', handleAuthCallback);
 
 app.get('/dashboard', async (req, res) => {
@@ -32,8 +33,6 @@ app.get('/dashboard', async (req, res) => {
         const profileid = req.session.profileid;
         console.log(`Usuario:\n${profileid.nickname}`);
         console.log(`Token:\n${tokenid}`);
-        console.log(`Valor globalTokenid:\n${global.globalTokenid}`);
-        console.log(`Valor globalProfileid:\n${global.globalProfileid}`);
         res.sendFile(__dirname + '/public/dashboard.html');
     }
 });
@@ -41,8 +40,6 @@ app.get('/dashboard', async (req, res) => {
 app.get('/questions', async (req, res) => {
     const tokenid = await autenticar(req, res, '/questions');
     if (tokenid) {
-        console.log(`Valor globalTokenid en /questions:\n${global.globalTokenid}`);
-        console.log(`Valor globalProfileid en /questions:\n${global.globalProfileid}`);
         res.sendFile(__dirname + '/public/questions.html');
     }
 });
@@ -51,18 +48,7 @@ app.get('/questions', async (req, res) => {
 app.post('/callback', async (req, res) => {
     console.log('Recibiendo notificación en /callback');
     const notification = req.body;
-
-    // Verificar si profileid está definido en las variables globales
-    if (!global.globalProfileid) {
-        console.error('globalProfileid no está definido.');
-        return res.status(400).send('globalProfileid no está definido.');
-    }
-
-    const profileid = global.globalProfileid;
-    console.log(`Usuario: ${profileid.nickname}`);
     console.log("Notificación recibida", notification);
-    console.log(`Valor globalTokenid en /callback:\n${global.globalTokenid}`);
-    console.log(`Valor globalProfileid en /callback:\n${global.globalProfileid}`);
     res.status(200).send('Notification received');
 });
 

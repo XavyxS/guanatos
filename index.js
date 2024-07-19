@@ -8,12 +8,13 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Middleware para manejar datos de formularios
 app.use(express.static('public'));
 app.use(cookieParser());
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false, // Asegúrate de no guardar sesiones no inicializadas
     cookie: { secure: false, httpOnly: true, maxAge: (30 * 24 * 60 * 60 * 1000) }
 }));
 
@@ -43,9 +44,14 @@ app.get('/questions', async (req, res) => {
 });
 
 // Ruta para manejar las notificaciones de Mercado Libre
-app.post('/callback', (req, res) => {
+app.post('/callback', async (req, res) => {
     console.log('Recibiendo notificación en /callback');
-    console.log('Profile ID en /callback antes de verificar:', req.session.profileid);
+    console.log('Estado de la sesión en /callback:', req.session);
+
+    const tokenid = await autenticar(req, res, '/callback');
+    if (!tokenid) {
+        return res.status(401).send('No se pudo autenticar');
+    }
 
     const notification = req.body;
 

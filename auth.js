@@ -42,7 +42,7 @@ async function verificarOCrearBD(profileid) {
         ];
 
         const createTableQuery = `
-            CREATE TABLE IF NOT EXISTS ?? (
+            CREATE TABLE IF NOT EXISTS {tableName} (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 _id VARCHAR(255),
                 resource VARCHAR(255),
@@ -56,7 +56,7 @@ async function verificarOCrearBD(profileid) {
         `;
 
         for (const table of tables) {
-            await connection.query(createTableQuery, [table]);
+            await connection.query(createTableQuery.replace("{tableName}", table));
         }
     } finally {
         connection.release(); // Liberar la conexión de vuelta al pool

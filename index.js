@@ -44,6 +44,7 @@ app.get('/dashboard', async (req, res) => {
 app.get('/questions', async (req, res) => {
     const tokenid = await autenticar(req, res, '/questions');
     if (tokenid) {
+        console.log('El token del usuario es', tokenid)
         res.sendFile(__dirname + '/public/questions.html');
     }
 });

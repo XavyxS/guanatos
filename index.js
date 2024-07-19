@@ -7,6 +7,7 @@ const { autenticar, handleAuthCallback } = require('./auth'); // Importar las fu
 dotenv.config();
 const app = express();
 
+app.use(express.json());
 app.use(express.static('public'));
 app.use(cookieParser());
 app.use(session({

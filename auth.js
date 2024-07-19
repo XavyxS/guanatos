@@ -78,6 +78,8 @@ async function handleAuthCallback(req, res) {
         };
         req.session.profileid = profileid;
 
+        console.log('Profile ID almacenado en handleAuthCallback:', profileid);
+
         const nextUrl = req.session.nextUrl || '/dashboard';
         res.redirect(nextUrl);
     } catch (error) {

@@ -43,7 +43,7 @@ app.get('/questions', autenticar, (req, res) => {
     res.sendFile(__dirname + '/public/questions.html');
 });
 
-app.get('/auth_callback', handleAuthCallback);
+app.get('/auth', handleAuthCallback);
 
 // Nueva ruta para recibir notificaciones
 app.post('/callback', async (req, res) => {

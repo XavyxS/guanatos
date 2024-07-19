@@ -2,7 +2,6 @@ const axios = require('axios');
 
 async function autenticar(req, res, nextUrl) {
     if (req.session.profileid) {
-        
         const created_at = new Date(req.session.tokenid.created_at);
         const current_date = new Date();
         const fiveHoursInMillis = 5 * 60 * 60 * 1000;
@@ -79,7 +78,6 @@ async function handleAuthCallback(req, res) {
         };
         req.session.profileid = profileid;
 
-        
         const nextUrl = req.session.nextUrl || '/dashboard';
         res.redirect(nextUrl);
     } catch (error) {

@@ -16,9 +16,6 @@ app.use(session({
     cookie: { secure: false, httpOnly: true, maxAge: (30 * 24 * 60 * 60 * 1000) }
 }));
 
-// Middleware para analizar JSON
-app.use(express.json());
-
 app.get('/auth', handleAuthCallback);
 
 app.get('/dashboard', async (req, res) => {

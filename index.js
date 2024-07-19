@@ -47,8 +47,7 @@ app.get('/questions', async (req, res) => {
 app.post('/callback', async (req, res) => {
     console.log('Recibiendo notificación en /callback');
     const notification = req.body;
-    const profileid = req.session.profileid;
-    const nickname = profileid.nickname;
+    const nickname = req.session.profileid.nickname;
     console.log(`Usuario: ${nickname}`);
     console.log("Notificación recibida", notification);
     res.status(200).send('Notification received');

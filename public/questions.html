@@ -1,31 +1,125 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard del Proyecto Guanatos / Preguntas</title>
-    <link rel="stylesheet" href="./style.css">
+    <title>Preguntas</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
     <div class="sidebar">
         <ul>
-            <li><a href="/dashboard">Inicio</a></li>
+            <li><a href="/">Inicio</a></li>
             <li><a href="/questions">Preguntas</a></li>
             <li><a href="#">Ventas</a></li>
             <li><a href="#">Mensajes</a></li>
-            <li><a href="#">Campañas</a></li>
+            <li><a href="/campaigns">Campañas</a></li>
         </ul>
     </div>
     <div class="content">
         <div class="header">
-            <div class="app-name">Proyecto Guanatos</div>
+            <div class="app-name">MercaFlows</div>
             <div class="user-info" id="user-info"></div>
         </div>
-        <h1>Bienvenido al Proyecto Guanatos</h1>
-        <p>Esta es la página de Preguntas.</p>
+        <h1>Preguntas</h1>
+        <div id="questions-list"></div>
+
+        <script>
+            // Cargar las preguntas del usuario
+            async function loadQuestions() {
+                try {
+                    const response = await fetch('/api/questions');
+                    const questions = await response.json();
+
+                    const questionsList = document.getElementById('questions-list');
+                    questionsList.innerHTML = ''; // Clear the list first
+
+                    if (questions.length === 0) {
+                        questionsList.innerHTML = '<p>Por el momento no tienes ninguna pregunta para responder</p>';
+                        return;
+                    }
+
+                    for (const question of questions) {
+                        const userInfoResponse = await fetch(`/api/user_info?user_id=${question.from}`);
+                        const userInfo = await userInfoResponse.json();
+
+                        const itemInfoResponse = await fetch(`/api/item_info?item_id=${question.item_id}`);
+                        const itemInfo = await itemInfoResponse.json();
+
+                        const questionItem = document.createElement('div');
+                        questionItem.innerHTML = `
+                            <h3>Usuario: ${userInfo.nickname}</h3>
+                            <p>Question id: ${question.id}</p>
+                            <p>Artículo: ${itemInfo.id} - ${itemInfo.title}</p>
+                            <p>Precio: ${itemInfo.price}</p>
+                            <p>Link: ${itemInfo.permalink}</p>
+                            <p>Pregunta: ${question.text}</p>
+                            <p>Fecha: ${new Date(question.date_created).toLocaleString()}</p>
+                            <p>Estado: ${question.status}</p>
+                            ${question.status === 'UNANSWERED' ? `
+                                <textarea id="answer-${question.id}" placeholder="Escribe tu respuesta aquí"></textarea>
+                                <button onclick="sendAnswer(${question.id})">Responder</button>
+                            ` : `
+                                <p>Respuesta: ${question.answer.text}</p>
+                                <p>Fecha de Respuesta: ${new Date(question.answer.date_created).toLocaleString()}</p>
+                            `}
+                        `;
+                        questionsList.appendChild(questionItem);
+                    }
+                } catch (error) {
+                    console.error('Error loading questions:', error);
+                    document.getElementById('questions-list').innerText = 'Error al cargar las preguntas';
+                }
+            }
+
+            // Enviar la respuesta a la pregunta
+            async function sendAnswer(questionId) {
+                const answerText = document.getElementById(`answer-${questionId}`).value;
+                if (!answerText) {
+                    alert('La respuesta no puede estar vacía');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/answer', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ question_id: questionId, text: answerText })
+                    });
+
+                    if (response.ok) {
+                        alert('Respuesta enviada correctamente');
+                        loadQuestions(); // Recargar las preguntas después de responder
+                    } else {
+                        const errorData = await response.json();
+                        alert(`Error al enviar la respuesta: ${errorData.message}`);
+                    }
+                } catch (error) {
+                    console.error('Error sending answer:', error);
+                    alert('Error al enviar la respuesta');
+                }
+            }
+
+            // Cargar la información del vendedor
+            async function loadUserInfo() {
+                try {
+                    const response = await fetch('/api/user_info');
+                    const userInfo = await response.json();
+
+                    const userInfoDiv = document.getElementById('user-info');
+                    userInfoDiv.textContent = `Usuario: ${userInfo.nickname}`;
+                } catch (error) {
+                    console.error('Error loading user info:', error);
+                }
+            }
+
+            // Cargar la información del vendedor y las preguntas cuando la página se carga
+            window.onload = function() {
+                loadUserInfo();
+                loadQuestions();
+            };
+        </script>
     </div>
-
 </body>
-
 </html>

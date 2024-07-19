@@ -1,3 +1,4 @@
+const axios = require('axios'); // Asegúrate de importar axios
 const mysql = require('mysql2/promise'); // Importa mysql2
 
 function sanitizeDatabaseName(name) {
@@ -65,7 +66,8 @@ async function autenticar(req, res, nextUrl) {
                     created_at: new Date().toISOString()
                 };
                 req.session.profileid = req.session.profileid;
-                console.log('El usuario ya existe y se renovo el token')
+                console.log('El usuario ya existe y se renovó el token');
+                
                 // VERIFICAR LA EXISTENCIA DE LA BD Y CREARLA SI NO EXISTE
                 await verificarOCrearBD(req.session.profileid);
 
@@ -76,7 +78,8 @@ async function autenticar(req, res, nextUrl) {
             }
         } else {
             req.session.profileid = req.session.profileid;
-            console.log('El usuario ya existe')
+            console.log('El usuario ya existe');
+            
             // VERIFICAR LA EXISTENCIA DE LA BD Y CREARLA SI NO EXISTE
             await verificarOCrearBD(req.session.profileid);
 
@@ -132,7 +135,6 @@ async function handleAuthCallback(req, res) {
         res.status(500).send(`<h1>Error during authorization</h1><p>${error.response ? error.response.data : error.message}</p>`);
     }
 }
-
 
 module.exports = {
     autenticar,

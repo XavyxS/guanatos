@@ -186,6 +186,85 @@ app.get('/api/questions', async (req, res) => {
 });
 
 
+// Nueva ruta para manejar notificaciones de ordenes
+app.get('/api/orders', async (req, res) => {
+    const tokenid = await autenticar(req, res, '/orders');
+    if (!tokenid) {
+        return res.status(400).send('User ID not found in session');
+    }
+
+    try {
+        const connection = await pool.getConnection();
+
+        try {
+            // Obtener el nombre de la base de datos que termina con el user_id
+            const [databases] = await connection.query('SHOW DATABASES');
+            const dbName = databases
+                .map(db => db.Database)
+                .find(db => db.endsWith(`_${tokenid.user_id}`));
+
+            if (!dbName) {
+                throw new Error(`No se encontró ninguna base de datos que termine en _${tokenid.user_id}`);
+            }
+
+            // Usar la base de datos específica
+            await connection.query(`USE ${sanitizeDatabaseName(dbName)}`);
+
+            // Leer los registros de la tabla "orders_v2"
+            const [rows] = await connection.query('SELECT * FROM orders_v2');
+
+            // Depurar los registros con campos "resource" repetidos
+            const uniqueResources = {};
+            rows.forEach(row => {
+                if (!uniqueResources[row.resource] || new Date(uniqueResources[row.resource].received) < new Date(row.received)) {
+                    uniqueResources[row.resource] = row;
+                }
+            });
+
+            const resourcesToDelete = rows.filter(row => !uniqueResources[row.resource]);
+
+            if (resourcesToDelete.length > 0) {
+                const deleteQuery = 'DELETE FROM orders_v2 WHERE id IN (?)';
+                await connection.query(deleteQuery, [resourcesToDelete.map(row => row.id)]);
+            }
+
+            const uniqueRows = Object.values(uniqueResources);
+
+            // Consultar cada notificación para obtener los detalles de la orden
+            const orders_v2 = [];
+            for (const row of uniqueRows) {
+                const orderId = row.resource.split('/').pop();
+                const orderResponse = await axios.get(`https://api.mercadolibre.com/orders/${questionId}`, {
+                    headers: {
+                        Authorization: `Bearer ${tokenid.access_token}`
+                    }
+                });
+
+                const orderData = orderResponse.data;
+
+                orders_v2.push({
+                    id: questionData.id,
+                    from: questionData.from.id,
+                    text: questionData.text,
+                    date_created: questionData.date_created,
+                    status: questionData.status,
+                    item_id: questionData.item_id,
+                    answer: questionData.answer || null
+                });
+
+            }
+
+            res.json(orders_v2);
+        } finally {
+            connection.release(); // Liberar la conexión de vuelta al pool
+        }
+    } catch (error) {
+        console.error('Error processing questions:', error);
+        res.status(500).send('Error processing orders');
+    }
+});
+
+
 // Ruta para obtener información del usuario que hizo la pregunta
 app.get('/api/user_info', async (req, res) => {
     const tokenid = await autenticar(req, res, '/user_info');

@@ -98,6 +98,7 @@ async function autenticar(req, res, nextUrl) {
                 await verificarOCrearBD(req.session.profileid);
 
                 return req.session.tokenid;
+
             } catch (error) {
                 console.error('Error al renovar el token:', error);
                 return null;
@@ -110,6 +111,7 @@ async function autenticar(req, res, nextUrl) {
             await verificarOCrearBD(req.session.profileid);
 
             return req.session.tokenid;
+            
         }
     } else {
         req.session.nextUrl = nextUrl;
